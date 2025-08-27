@@ -1,6 +1,6 @@
-# stock_watch
+# flutter-project
 
-A new Flutter project.
+A new Flutter project using camera and map.
 
 ## Getting Started
 
