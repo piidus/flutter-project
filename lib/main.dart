@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stock_watch/screens/places.dart';
-import 'package:stock_watch/widgets/place_list.dart';
+// import 'package:stock_watch/widgets/place_list.dart';
 
 final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,

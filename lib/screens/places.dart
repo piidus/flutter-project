@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:stock_watch/screens/add_place.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stock_watch/provider/places_provider.dart';
 
-class PlacesScreen extends StatelessWidget {
+import 'package:stock_watch/screens/add_place.dart';
+import 'package:stock_watch/widgets/place_list.dart';
+// import 'package:stock_watch/widgets/place_list.dart';
+
+class PlacesScreen extends ConsumerWidget {
   const PlacesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final places = ref.watch(placesProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 110, 193, 245),
@@ -15,7 +22,7 @@ class PlacesScreen extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (ctx) => const AddPlaceScreen(),
+                  builder: (ctx) => AddPlaceScreen(),
               ),
               );
             },
@@ -23,7 +30,7 @@ class PlacesScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(child: Text('Got no places yet, start adding some!')),
+      body: SafeArea(child: PlacesList(places: places,),),
     );
   }
 }
