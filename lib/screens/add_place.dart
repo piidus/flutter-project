@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stock_watch/model/place.dart';
 import 'package:stock_watch/provider/places_provider.dart';
+import 'package:stock_watch/widgets/image_taker.dart';
 class AddPlaceScreen extends ConsumerStatefulWidget {
-  AddPlaceScreen({super.key});
+  const AddPlaceScreen({super.key});
 
   @override
   ConsumerState<AddPlaceScreen> createState() => _AddPlaceScreenState();
@@ -44,6 +45,10 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
                 decoration: const InputDecoration(labelText: 'Title'),
                 controller: titleController,
               ),
+              const SizedBox(
+                height: 16,
+              ),
+              ImageTaker(),
               const SizedBox(
                 height: 16,
               ),

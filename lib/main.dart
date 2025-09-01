@@ -6,15 +6,15 @@ import 'package:stock_watch/screens/places.dart';
 
 final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
-  seedColor: const Color.fromARGB(255, 102, 6, 247),
+  seedColor: const Color.fromARGB(255, 166, 159, 177),
 
-  // onBackground: const Color.fromARGB(255, 56, 49, 66),
+  secondary: const Color.fromARGB(255, 173, 189, 199),
 );
 
 final theme = ThemeData().copyWith(
   // useMaterial3: true,
-  // scaffoldBackgroundColor: colorScheme.background,
   colorScheme: colorScheme,
+  scaffoldBackgroundColor: colorScheme.secondary ,
   textTheme: GoogleFonts.ubuntuCondensedTextTheme().copyWith(
     titleSmall: GoogleFonts.ubuntuCondensed(fontWeight: FontWeight.bold),
     titleMedium: GoogleFonts.ubuntuCondensed(fontWeight: FontWeight.bold),

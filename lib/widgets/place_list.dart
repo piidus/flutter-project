@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stock_watch/model/place.dart';
+import 'package:stock_watch/screens/place_detail.dart';
+
+
 class PlacesList extends ConsumerWidget {
   const PlacesList({super.key, required this.places});
 
@@ -15,8 +18,17 @@ class PlacesList extends ConsumerWidget {
     return ListView.builder(
       itemCount: places.length,
       itemBuilder: (ctx, index) => ListTile(
-        
+        leading: const Icon(Icons.place),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left: Radius.circular(10), right: Radius.circular(10)),
+        side: const BorderSide(color: Colors.white, width: 2),),
         title: Text(places[index].title, style: Theme.of(context).textTheme.titleLarge,),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => PlaceDetailScreen(place: places[index],),
+            ),
+          );
+        },
       ),
     );
   }
