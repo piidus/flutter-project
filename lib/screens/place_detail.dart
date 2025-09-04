@@ -28,7 +28,25 @@ class PlaceDetailScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Text(place.title),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              place.title,
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Image.memory(
+              place.image,
+              width: 300,
+              height: 300,
+              fit: BoxFit.cover,
+            ),
+          ]),
         ),
       
     ),
