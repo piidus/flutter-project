@@ -1,11 +1,13 @@
-// import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:camera/camera.dart';
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
 
 class ImageTaker extends StatefulWidget {
-  // Correct the type to accept a platform-independent Uint8List
   const ImageTaker({super.key, required this.imageTake});
   final Function(Uint8List pickedImageBytes) imageTake;
 
@@ -14,13 +16,12 @@ class ImageTaker extends StatefulWidget {
 }
 
 class _ImageTakerState extends State<ImageTaker> {
-  // Use XFile to store the picked image, as it's the return type of both methods.
-  XFile? pickedImageFile;
-
-  // CameraController and other variables for web live camera
+  Uint8List? _capturedImageBytes;
   CameraController? cameraController;
   List<CameraDescription> cameras = [];
   bool isCameraInitialized = false;
+
+  final GlobalKey _repaintBoundaryKey = GlobalKey();
 
   @override
   void initState() {
@@ -60,8 +61,12 @@ class _ImageTakerState extends State<ImageTaker> {
     XFile? pickedImage;
 
     if (kIsWeb) {
+      print('kisweb');
+      print('isCameraInitialized: $isCameraInitialized');
+      print('cameraController: $cameraController');
       if (isCameraInitialized && cameraController != null) {
         pickedImage = await cameraController!.takePicture();
+        print('Camera image taken: ${pickedImage.path}');
       }
     } else {
       final imagePicker = ImagePicker();
@@ -72,13 +77,31 @@ class _ImageTakerState extends State<ImageTaker> {
     }
 
     if (pickedImage != null) {
-      // Correctly read bytes and pass to the callback. This is platform-agnostic.
       final imageBytes = await pickedImage.readAsBytes();
       widget.imageTake(imageBytes);
 
       setState(() {
-        pickedImageFile = pickedImage;
+        _capturedImageBytes = imageBytes;
       });
+    }
+  }
+
+  void _takeScreenshot() async {
+    try {
+      RenderRepaintBoundary boundary = _repaintBoundaryKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List? pngBytes = byteData?.buffer.asUint8List();
+
+      if (pngBytes != null) {
+        // Use the captured image for preview and pass it to the widget's function.
+        widget.imageTake(pngBytes);
+        setState(() {
+          _capturedImageBytes = pngBytes;
+        });
+      }
+    } catch (e) {
+      print("Screenshot capture failed: $e");
     }
   }
 
@@ -91,42 +114,65 @@ class _ImageTakerState extends State<ImageTaker> {
   @override
   Widget build(BuildContext context) {
     Widget content;
-    if (pickedImageFile != null) {
-      // You must use the bytes to display the image.
+
+    if (kIsWeb && isCameraInitialized) {
+      content = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RepaintBoundary(
+            key: _repaintBoundaryKey,
+            child: AspectRatio(
+              aspectRatio: cameraController!.value.aspectRatio,
+              child: CameraPreview(cameraController!),
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _takeScreenshot,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade600,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Text(
+                'Take Screenshot',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (_capturedImageBytes != null) {
       content = GestureDetector(
         onTap: imageHandler,
-        child: FutureBuilder<Uint8List>(
-          future: pickedImageFile!.readAsBytes(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-              return Image.memory(
-                snapshot.data!,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              );
-            }
-            return const Center(child: CircularProgressIndicator());
-          },
+        child: Image.memory(
+          _capturedImageBytes!,
+          fit: BoxFit.cover,
+          width: double.infinity,
         ),
       );
     } else {
-      if (kIsWeb && isCameraInitialized) {
-        content = GestureDetector(
-          onTap: imageHandler,
-          child: AspectRatio(
-            aspectRatio: cameraController!.value.aspectRatio,
-            child: CameraPreview(cameraController!),
-          ),
-        );
-      } else {
-        content = GestureDetector(
-          onTap: imageHandler,
-          child: const Icon(
-            Icons.camera_alt,
-            size: 80,
-          ),
-        );
-      }
+      content = GestureDetector(
+        onTap: imageHandler,
+        child: const Icon(
+          Icons.camera_alt,
+          size: 80,
+          color: Colors.grey,
+        ),
+      );
     }
 
     return Container(
@@ -134,7 +180,7 @@ class _ImageTakerState extends State<ImageTaker> {
         border: Border.all(color: Colors.white, width: 2),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: content,
+      child: Center(child: content),
     );
   }
 }
